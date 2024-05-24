@@ -1,29 +1,31 @@
 extensions[nw]
-turtles-own[infectado? ]
+turtles-own[infectado? t_in inmune? t_im ]
 to setup
   clear-all
 nw:load-gml "/home/augusto/Descargas/SchoolNetwork.gml" turtles links
   [set shape "circle" set color green setxy random-xcor random-ycor set infectado? false]
-  ask n-of I_0 turtles [set color red  set infectado? true]
+  ask n-of I_0 turtles [set color red  set infectado? true set inmune? false set t_in 0 set t_im 0]
   reset-ticks
 end
 
 to go
-  ask turtles[infecta contagia recupera]
+  ask turtles[infecta contagia recupera ifelse t_in > 0 [set t_in t_in - 1][recupera] ifelse t_im > 0 [set t_im t_im - 1][set inmune? false] colorea]
   tick
 end
-
+to colorea
+  ifelse infectado? = true [set color green][ifelse inmune? = true [set color grey][set color red]]
+end
 
 to infecta
-  if infectado? = true [if random-float 1 > transmision [contagia]]
+  if infectado? = true and inmune? = false [if random-float 1 < transmision [contagia] ]
 end
 
 to  contagia
-  let pp one-of link-neighbors with [infectado? = false] if pp != nobody [ask pp [set infectado? true set color red]]
+  let pp one-of link-neighbors with [(infectado? = false ) and (inmune? = false)] if pp != nobody [ask pp [set infectado? true set t_in random T1]]
 end
 
 to recupera
-  if infectado? = true[if random-float 1 > recuperacion [set infectado? false set color green] ]
+  if infectado? = true[if random-float 1 < recuperacion [set infectado? false if random-float 1 < inmunidad [set inmune? true set t_im random T2]] ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -54,10 +56,10 @@ ticks
 30.0
 
 BUTTON
+40
 47
-79
-120
-112
+113
+80
 NIL
 setup
 NIL
@@ -101,7 +103,7 @@ transmision
 transmision
 0
 1
-0.6051
+0.2357
 0.0001
 1
 NIL
@@ -116,17 +118,17 @@ I_0
 I_0
 0
 10
-1.0
+4.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-124
-339
-187
-372
+129
+46
+192
+79
 NIL
 go
 T
@@ -148,17 +150,17 @@ recuperacion
 recuperacion
 0
 1
-0.6752
+0.121
 0.0001
 1
 NIL
 HORIZONTAL
 
 PLOT
-1340
-112
-1540
-262
+1190
+36
+1542
+304
 plot 1
 NIL
 NIL
@@ -171,19 +173,65 @@ false
 "" ""
 PENS
 "default" 1.0 0 -8053223 true "" "plot count turtles with [infectado? = true]"
-"pen-1" 1.0 0 -14439633 true "" "plot count turtles with [infectado? = false]"
+"pen-1" 1.0 0 -14439633 true "" "plot count turtles with [color = green]"
+"pen-2" 1.0 0 -7500403 true "" "plot count turtles with [color = grey]"
+
+SLIDER
+68
+275
+240
+308
+T_i
+T_i
+0
+10
+6.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+69
+318
+241
+351
+T1
+T1
+0
+30
+15.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+71
+364
+243
+397
+T2
+T2
+0
+30
+19.0
+1
+1
+NIL
+HORIZONTAL
 
 SLIDER
 64
 225
 236
 258
-T_i
-T_i
+inmunidad
+inmunidad
 0
-10
-4.0
 1
+0.478
+0.001
 1
 NIL
 HORIZONTAL
